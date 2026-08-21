@@ -80,7 +80,9 @@ no platform gets a bulk-import-tool advantage the others don't have).
 - **Nebula Graph requires an explicit `ADD HOSTS` command** to activate a storage node before `CREATE SPACE` will succeed — the storage host appears in `SHOW HOSTS` immediately on container start, but is not usable until explicitly activated. This is Nebula-specific setup friction with no equivalent in the other four platforms.
 - **Traversal latency was largely flat across 1/2/3-hop depths on every cloud-hosted platform** (CognoDB, AuraDB, Memgraph, ArangoDB), all sitting in a similar range regardless of hop count — this strongly suggests network round-trip time to the managed instance dominated the measurement rather than actual query execution cost. Nebula, running locally over Docker's internal network, did not show this pattern. This is discussed further in Analysis below.
 - **Data-loading time varied enormously by platform** and is likely driven more by each driver's bulk-insert mechanics (Cypher `UNWIND` batches vs. ArangoDB's `insertDocuments()` calls vs. Nebula's local network) than by the underlying storage engines themselves — see the Loading results table.
-- **CognoDB Cloud and ArangoDB Oasis's free-tier instances could not reliably sustain the full 100-iteration / 20-second mixed workload** within a practical time budget when other local processes (browser tabs, IDE tooling) were competing for the same client machine's CPU and network — itself a genuine reflection of how constrained these free tiers are under realistic multitasking conditions, not a flaw in the harness. **Reported results for CognoDB and ArangoDB use 20 iterations / 5-second mixed workload; AuraDB, Memgraph, and Nebula completed the full 100 iterations / 20-second mixed workload.** Load-time figures (which don't depend on iteration count) were confirmed stable across 3-4 repeated attempts per platform regardless of this difference.
+- **CognoDB Cloud's connection was terminated by the server partway through the 100-iteration run** — `ServiceUnavailableException: Connection to the database terminated`, after successfully completing only the 1-hop traversal measurement (100/100 samples). This happened on a clean, isolated run with no other iteration-count reduction applied. It's a genuine finding: CognoDB's free-tier instance appears unable to sustain a long-running Bolt session through a full multi-stage workload, at least under the conditions tested here. Reported CognoDB numbers below reflect only the 1-hop traversal measurement that did complete; every downstream metric (2/3-hop, lookups, aggregation, mixed workload, footprint) could not be measured for this platform.
+- **ArangoDB Oasis's connection failed mid-workload with a `503 upstream connect error`**, occurring during the 2-hop traversal measurement after a severe latency spike (one sample hit 33.7 seconds, ~100x the typical value) that suggests the connection was already degrading before the hard failure. This occurred across multiple independent attempts at the full 100-iteration scale, always in the same general area of the workload (early traversal phase), while never affecting the initial data load. Reported ArangoDB numbers below reflect only the 1-hop traversal and the (unreliable, partially-degraded) 2-hop measurement; lookups, aggregation, mixed workload, and footprint could not be measured for this platform at full scale.
+- **Nebula's `SHOW STATS` command requires a `submit job stats` to be run first** to populate its statistics; the harness does not currently do this, so Nebula's footprint section reports the resulting error rather than real numbers — a straightforward extension for anyone reproducing this benchmark, not attempted here due to time.
 
 ## Repository layout
 
@@ -164,69 +166,74 @@ cognodb-benchmark/
 
 ### Traversals (p50 / p95, ms)
 
+<!-- CognoDB's connection dropped mid-run after only the 1-hop measurement completed
+     (see caveats — free-tier instance could not sustain the full read workload).
+     ArangoDB's connection dropped mid-2-hop with a severe latency spike immediately
+     beforehand, consistent with the connection already degrading before the 503 hit. -->
+
 | Platform | 1-hop | 2-hop | 3-hop |
 |---|---|---|---|
-| CognoDB Cloud | — / — | — / — | — / — |
-| Neo4j AuraDB Free | — / — | — / — | — / — |
-| Memgraph Cloud | — / — | — / — | — / — |
-| ArangoDB Oasis | — / — | — / — | — / — |
-| Nebula Graph (self-hosted) | — / — | — / — | — / — |
+| CognoDB Cloud | 614.44 / 623.80 | *(run failed before completion — see caveats)* | *(run failed before completion — see caveats)* |
+| Neo4j AuraDB Free | 212.22 / 218.85 | 211.89 / 220.69 | 211.72 / 250.93 |
+| Memgraph Cloud | 162.35 / 166.95 | 162.38 / 171.37 | 164.21 / 647.64 |
+| ArangoDB Oasis | 304.48 / 385.56 | 315.47 / 4492.82 *(run failed shortly after — see caveats)* | *(not reached — see caveats)* |
+| Nebula Graph (self-hosted) | 2.20 / 3.60 | 3.38 / 21.41 | 6.64 / 136.45 |
 
 ### Lookups (p50 / p95, ms)
 
 | Platform | Point lookup | Indexed range lookup | Indexed property |
 |---|---|---|---|
-| CognoDB Cloud | — / — | — / — | `Author.id` |
-| Neo4j AuraDB Free | — / — | — / — | `Author.id` |
-| Memgraph Cloud | — / — | — / — | `Author.id` |
-| ArangoDB Oasis | — / — | — / — | `authors.id` |
-| Nebula Graph (self-hosted) | — / — | — / — | `author.id` (tag index) |
+| CognoDB Cloud | *(not reached — run failed after 1-hop traversal)* | *(not reached)* | `Author.id` |
+| Neo4j AuraDB Free | 210.72 / 218.47 | 209.13 / 224.11 | `Author.id` |
+| Memgraph Cloud | 161.44 / 167.34 | 161.91 / 166.28 | `Author.id` |
+| ArangoDB Oasis | *(not reached — run failed during traversal workload)* | *(not reached)* | `authors.id` |
+| Nebula Graph (self-hosted) | 1.51 / 1.77 | 1.80 / 2.53 | `author.id` (tag index) |
 
 ### Aggregation (p50 / p95, ms)
 
 | Platform | Count-by-bucket (GROUP BY id % 10) |
 |---|---|
-| CognoDB Cloud | — / — |
-| Neo4j AuraDB Free | — / — |
-| Memgraph Cloud | — / — |
-| ArangoDB Oasis | — / — |
-| Nebula Graph (self-hosted) | — / — |
+| CognoDB Cloud | *(not reached — run failed after 1-hop traversal)* |
+| Neo4j AuraDB Free | 211.59 / 219.01 |
+| Memgraph Cloud | 164.68 / 168.92 |
+| ArangoDB Oasis | *(not reached — run failed during traversal workload)* |
+| Nebula Graph (self-hosted) | 59.16 / 67.73 |
 
 ### Mixed workload (20 concurrent clients, 20s, 80% read / 20% write)
 
 | Platform | Throughput (ops/sec) | p50 latency | p95 latency | Errors |
 |---|---|---|---|---|
-| CognoDB Cloud | — | — | — | — |
-| Neo4j AuraDB Free | — | — | — | — |
-| Memgraph Cloud | — | — | — | — |
-| ArangoDB Oasis | — | — | — | — |
-| Nebula Graph (self-hosted) | — | — | — | — |
+| CognoDB Cloud | *(not reached — run failed after 1-hop traversal)* | — | — | — |
+| Neo4j AuraDB Free | 102.75 | 202.67 ms | 263.68 ms | 0 |
+| Memgraph Cloud | 102.20 | 174.31 ms | 279.00 ms | 0 |
+| ArangoDB Oasis | *(not reached — run failed during traversal workload)* | — | — | — |
+| Nebula Graph (self-hosted) | 494.90 | 19.04 ms | 133.21 ms | 0 |
 
 ### Footprint
 
 | Platform | Stored data size | Memory usage | Instance spec |
 |---|---|---|---|
-| CognoDB Cloud | — | — | 0.5 vCPU / 256 MB / 1 GB disk |
-| Neo4j AuraDB Free | — | — | — |
-| Memgraph Cloud | — | — | — |
-| ArangoDB Oasis | — | — | — |
-| Nebula Graph (self-hosted) | not observable via driver; see `docker stats` | — | capped to ~0.5 vCPU / 256 MB total |
+| CognoDB Cloud | not reached (run failed early) | not observable via driver | 0.5 vCPU / 256 MB / 1 GB disk |
+| Neo4j AuraDB Free | not observable via driver | not observable via driver | 1 GB RAM (per Aura console) |
+| Memgraph Cloud | not observable via driver | not observable via driver | 2 GB RAM / 2 CPU (smallest available trial tier) |
+| ArangoDB Oasis | not reached (run failed mid-traversal) | not observable via driver | free-trial deployment (see Oasis console) |
+| Nebula Graph (self-hosted) | not observable — `SHOW STATS` requires a manual `submit job stats` first, not run by the harness | see `docker stats` | run unconstrained after tight Docker limits (~80-100MB/process) proved insufficient for `storaged` to operate — see caveats |
+
+Confirmed node/relationship counts from AuraDB and Memgraph's footprint queries (both platforms that completed the full run): **12,008 nodes / 118,505 relationships** — matching the expected deduplicated count from the dataset.
 
 ## Analysis
 
-<!-- TODO: write this after you have real numbers. A few prompts to answer honestly: -->
+**Nebula's local-network advantage dominates every measurement.** Running over Docker's internal network rather than a remote managed cloud instance, Nebula's traversal latencies (1-hop p50: 2.2ms) are roughly 70-95x faster than any cloud platform (AuraDB: 212ms, Memgraph: 162ms, ArangoDB: 304ms). This is not a claim that Nebula's storage engine is dramatically superior — it's almost entirely a network-topology effect. A fair like-for-like comparison would need Nebula deployed on the same cloud region as the others, which the assignment's Docker-based fairness allowance doesn't provide for. This is the single most important caveat in reading these results: **Nebula's numbers measure "local Docker" vs. everyone else's "managed cloud over the internet," not "Nebula the database" vs. "everyone else."**
 
-- Where did CognoDB land relative to the others on raw latency, and does that
-  hold across all three hop depths or only some?
-- Which platform's *architecture* (in-memory vs. disk-backed, single-node vs.
-  storage/compute-separated, property graph vs. multi-model) plausibly
-  explains the biggest gaps you saw — and where does that story *not* hold up?
-- Did the mixed read/write workload change the ranking versus the pure-read
-  traversal numbers? If so, why might contention behave differently.
-- Anywhere the free-tier resource caps (rather than the database engine
-  itself) look like the dominant factor — be explicit about this, since
-  conflating "small free instance" with "slow database" is the single easiest
-  way to draw a wrong conclusion from this kind of benchmark.
+**Among the cloud platforms, traversal latency was close to flat across 1/2/3-hop depths for AuraDB and Memgraph** (AuraDB: 212 / 212 / 212ms p50; Memgraph: 162 / 162 / 164ms p50) — strongly suggesting network round-trip time to the managed instance, not actual graph-traversal cost, dominated the measurement. If query execution cost scaled meaningfully with hop depth, we'd expect increasing latency with each additional hop; instead the numbers barely move. This means the benchmark, as run against remote cloud instances from a single client machine, is measuring "cost of one network round-trip to this region" at least as much as it's measuring "cost of a graph traversal" — a limitation worth being explicit about rather than over-interpreting small differences between platforms as query-engine performance differences.
+
+**Memgraph was consistently faster than AuraDB on every completed metric** (traversals: ~162ms vs ~212ms p50; mixed workload p50: 174ms vs 203ms) despite both speaking the same Bolt/Cypher interface. Memgraph's in-memory-first architecture is a plausible explanation, but so is its considerably larger free-tier allocation (2GB RAM / 2 CPU vs Aura Free's more modest tier) — with only one data point each, this benchmark cannot cleanly separate "faster architecture" from "more generous free tier," and it would be a mistake to claim otherwise from this data alone.
+
+**CognoDB and ArangoDB's free-tier instances both failed to sustain a long-running session through the full workload**, and in both cases the failure happened mid-workload rather than immediately — the initial data load and first traversal measurements succeeded normally. This pattern (works fine briefly, then the connection degrades or drops under sustained multi-stage load) looks more like a free-tier connection/session timeout or resource-reclaim policy than a fundamental limitation of either database engine. The one CognoDB traversal measurement that did complete (1-hop, p50 614ms) was already 3x slower than any other cloud platform even before the failure — worth flagging honestly, though a single metric from one platform isn't enough to draw a firm conclusion about CognoDB's steady-state performance.
+
+**The mixed read/write workload did not reorder the ranking** versus pure-read traversal numbers for the two platforms where both were measured (AuraDB, Memgraph): Memgraph stayed faster on both. Nebula's mixed-workload throughput (494.9 ops/sec) was proportionally even further ahead of the cloud platforms (~103 ops/sec each) than its traversal numbers were, consistent with the same local-network explanation rather than a different bottleneck emerging under write contention.
+
+**Bottom line:** the clearest, most defensible finding from this benchmark is not "database X is fastest" — it's that **free-tier resource and session limits, and network topology, were the dominant factors observed**, sometimes preventing a platform from completing the workload at all. Any ranking of the underlying database engines themselves would require resource-matched, same-region deployments and multiple repeated runs to separate real architectural differences from these confounds — future work this harness is structured to support (see below).
 
 ## What's not covered / possible extensions
 
