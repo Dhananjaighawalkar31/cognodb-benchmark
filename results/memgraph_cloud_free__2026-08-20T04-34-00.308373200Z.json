@@ -1,0 +1,101 @@
+{
+  "platform" : "Memgraph Cloud (free)",
+  "startedAtUtc" : "2026-08-20T04:32:43.427649Z",
+  "environment" : {
+    "iterations_per_read_workload" : 20,
+    "mixed_workload_concurrency" : 20,
+    "mixed_workload_duration_seconds" : 5,
+    "load_batch_size" : 1000,
+    "dataset_file" : "data\\ca-HepPh.txt.gz",
+    "node_count" : 12008,
+    "relationship_count" : 237010
+  },
+  "loading" : {
+    "total_wall_clock_ms" : 26315,
+    "nodes_per_second" : 456.32,
+    "relationships_per_second" : 9006.65
+  },
+  "traversals" : {
+    "1_hop" : {
+      "count" : 20,
+      "min_ms" : 186.3,
+      "max_ms" : 223.01,
+      "mean_ms" : 204.74,
+      "p50_ms" : 204.77,
+      "p95_ms" : 222.33,
+      "p99_ms" : 223.01
+    },
+    "2_hop" : {
+      "count" : 20,
+      "min_ms" : 187.41,
+      "max_ms" : 222.44,
+      "mean_ms" : 204.82,
+      "p50_ms" : 204.77,
+      "p95_ms" : 206.24,
+      "p99_ms" : 222.44
+    },
+    "3_hop" : {
+      "count" : 20,
+      "min_ms" : 178.37,
+      "max_ms" : 614.71,
+      "mean_ms" : 235.54,
+      "p50_ms" : 204.81,
+      "p95_ms" : 415.35,
+      "p99_ms" : 614.71
+    }
+  },
+  "lookups" : {
+    "point_lookup" : {
+      "count" : 20,
+      "min_ms" : 203.39,
+      "max_ms" : 206.87,
+      "mean_ms" : 204.83,
+      "p50_ms" : 204.78,
+      "p95_ms" : 206.26,
+      "p99_ms" : 206.87
+    },
+    "indexed_range_lookup" : {
+      "count" : 20,
+      "min_ms" : 203.22,
+      "max_ms" : 206.91,
+      "mean_ms" : 204.82,
+      "p50_ms" : 204.61,
+      "p95_ms" : 205.79,
+      "p99_ms" : 206.91
+    }
+  },
+  "aggregations" : {
+    "count_by_id_bucket" : {
+      "count" : 20,
+      "min_ms" : 202.1,
+      "max_ms" : 206.9,
+      "mean_ms" : 204.86,
+      "p50_ms" : 204.88,
+      "p95_ms" : 206.28,
+      "p99_ms" : 206.9
+    }
+  },
+  "mixedWorkload" : {
+    "concurrency" : 20,
+    "duration_seconds" : 5,
+    "read_write_mix" : "80/20",
+    "total_ops" : 401,
+    "errors" : 0,
+    "throughput_ops_per_sec" : 80.2,
+    "latency" : {
+      "count" : 401,
+      "min_ms" : 195.93,
+      "max_ms" : 810.24,
+      "mean_ms" : 253.33,
+      "p50_ms" : 205.09,
+      "p95_ms" : 708.52,
+      "p99_ms" : 725.26
+    }
+  },
+  "footprint" : {
+    "node_count" : 12008,
+    "relationship_count" : 118505,
+    "note" : "Stored data size / memory usage: check the platform's own console — not exposed via Cypher on most managed tiers."
+  },
+  "caveats" : [ ]
+}

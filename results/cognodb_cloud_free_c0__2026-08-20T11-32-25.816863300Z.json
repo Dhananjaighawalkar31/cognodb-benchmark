@@ -1,0 +1,34 @@
+{
+  "platform" : "CognoDB Cloud (free c0)",
+  "startedAtUtc" : "2026-08-20T10:29:39.477064300Z",
+  "environment" : {
+    "iterations_per_read_workload" : 100,
+    "mixed_workload_concurrency" : 20,
+    "mixed_workload_duration_seconds" : 20,
+    "load_batch_size" : 1000,
+    "dataset_file" : "data\\ca-HepPh.txt.gz",
+    "node_count" : 12008,
+    "relationship_count" : 237010
+  },
+  "loading" : {
+    "total_wall_clock_ms" : 77609,
+    "nodes_per_second" : 154.72,
+    "relationships_per_second" : 3053.9
+  },
+  "traversals" : {
+    "1_hop" : {
+      "count" : 100,
+      "min_ms" : 599.51,
+      "max_ms" : 710.61,
+      "mean_ms" : 616.36,
+      "p50_ms" : 614.44,
+      "p95_ms" : 623.8,
+      "p99_ms" : 695.39
+    }
+  },
+  "lookups" : { },
+  "aggregations" : { },
+  "mixedWorkload" : { },
+  "footprint" : { },
+  "caveats" : [ "Run failed: ServiceUnavailableException: Connection to the database terminated. Please ensure that your database is listening on the correct host and port and that you have compatible encryption settings both on Neo4j server and driver. Note that the default encryption setting has changed in Neo4j 4.0." ]
+}

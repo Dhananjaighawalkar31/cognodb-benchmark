@@ -1,0 +1,20 @@
+{
+  "platform" : "Nebula Graph (self-hosted, Docker, capped to CognoDB free-tier resources)",
+  "startedAtUtc" : "2026-08-20T08:59:23.338915500Z",
+  "environment" : {
+    "iterations_per_read_workload" : 20,
+    "mixed_workload_concurrency" : 20,
+    "mixed_workload_duration_seconds" : 5,
+    "load_batch_size" : 1000,
+    "dataset_file" : "data\\ca-HepPh.txt.gz",
+    "node_count" : 12008,
+    "relationship_count" : 237010
+  },
+  "loading" : { },
+  "traversals" : { },
+  "lookups" : { },
+  "aggregations" : { },
+  "mixedWorkload" : { },
+  "footprint" : { },
+  "caveats" : [ "Run failed: RuntimeException: java.lang.RuntimeException: nGQL failed [REBUILD TAG INDEX author_id_index]: SemanticError: Index author_id_index not found in space benchmark" ]
+}

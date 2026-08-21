@@ -1,0 +1,99 @@
+{
+  "platform" : "Nebula Graph (self-hosted, Docker, capped to CognoDB free-tier resources)",
+  "startedAtUtc" : "2026-08-21T03:53:51.121679100Z",
+  "environment" : {
+    "iterations_per_read_workload" : 100,
+    "mixed_workload_concurrency" : 20,
+    "mixed_workload_duration_seconds" : 20,
+    "load_batch_size" : 1000,
+    "dataset_file" : "data\\ca-HepPh.txt.gz",
+    "node_count" : 12008,
+    "relationship_count" : 237010
+  },
+  "loading" : {
+    "total_wall_clock_ms" : 2306,
+    "nodes_per_second" : 5207.29,
+    "relationships_per_second" : 102779.71
+  },
+  "traversals" : {
+    "1_hop" : {
+      "count" : 100,
+      "min_ms" : 1.47,
+      "max_ms" : 4.39,
+      "mean_ms" : 2.37,
+      "p50_ms" : 2.2,
+      "p95_ms" : 3.6,
+      "p99_ms" : 4.08
+    },
+    "2_hop" : {
+      "count" : 100,
+      "min_ms" : 1.77,
+      "max_ms" : 60.13,
+      "mean_ms" : 6.81,
+      "p50_ms" : 3.38,
+      "p95_ms" : 21.41,
+      "p99_ms" : 51.65
+    },
+    "3_hop" : {
+      "count" : 100,
+      "min_ms" : 2.76,
+      "max_ms" : 209.22,
+      "mean_ms" : 31.36,
+      "p50_ms" : 6.64,
+      "p95_ms" : 136.45,
+      "p99_ms" : 206.08
+    }
+  },
+  "lookups" : {
+    "point_lookup" : {
+      "count" : 100,
+      "min_ms" : 1.07,
+      "max_ms" : 1.93,
+      "mean_ms" : 1.46,
+      "p50_ms" : 1.51,
+      "p95_ms" : 1.77,
+      "p99_ms" : 1.84
+    },
+    "indexed_range_lookup" : {
+      "count" : 100,
+      "min_ms" : 1.45,
+      "max_ms" : 4.68,
+      "mean_ms" : 1.94,
+      "p50_ms" : 1.8,
+      "p95_ms" : 2.53,
+      "p99_ms" : 3.86
+    }
+  },
+  "aggregations" : {
+    "count_by_id_bucket" : {
+      "count" : 100,
+      "min_ms" : 51.34,
+      "max_ms" : 90.77,
+      "mean_ms" : 59.95,
+      "p50_ms" : 59.16,
+      "p95_ms" : 67.73,
+      "p99_ms" : 77.17
+    }
+  },
+  "mixedWorkload" : {
+    "concurrency" : 20,
+    "duration_seconds" : 20,
+    "read_write_mix" : "80/20",
+    "total_ops" : 9898,
+    "errors" : 0,
+    "throughput_ops_per_sec" : 494.9,
+    "latency" : {
+      "count" : 9898,
+      "min_ms" : 1.12,
+      "max_ms" : 429.28,
+      "mean_ms" : 40.44,
+      "p50_ms" : 19.04,
+      "p95_ms" : 133.21,
+      "p99_ms" : 192.35
+    }
+  },
+  "footprint" : {
+    "note" : "footprint query failed: java.lang.RuntimeException: nGQL failed [SHOW STATS]: There is no any stats info to show, please execute `submit job stats' firstly!"
+  },
+  "caveats" : [ ]
+}

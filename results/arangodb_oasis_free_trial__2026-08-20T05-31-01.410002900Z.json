@@ -1,0 +1,43 @@
+{
+  "platform" : "ArangoDB Oasis (free trial)",
+  "startedAtUtc" : "2026-08-20T05:14:44.245199300Z",
+  "environment" : {
+    "iterations_per_read_workload" : 20,
+    "mixed_workload_concurrency" : 20,
+    "mixed_workload_duration_seconds" : 5,
+    "load_batch_size" : 1000,
+    "dataset_file" : "data\\ca-HepPh.txt.gz",
+    "node_count" : 12008,
+    "relationship_count" : 237010
+  },
+  "loading" : {
+    "total_wall_clock_ms" : 170793,
+    "nodes_per_second" : 70.31,
+    "relationships_per_second" : 1387.7
+  },
+  "traversals" : {
+    "1_hop" : {
+      "count" : 20,
+      "min_ms" : 269.83,
+      "max_ms" : 349.01,
+      "mean_ms" : 308.39,
+      "p50_ms" : 307.22,
+      "p95_ms" : 327.11,
+      "p99_ms" : 349.01
+    },
+    "2_hop" : {
+      "count" : 20,
+      "min_ms" : 273.42,
+      "max_ms" : 3574.07,
+      "mean_ms" : 744.98,
+      "p50_ms" : 314.24,
+      "p95_ms" : 3272.5,
+      "p99_ms" : 3574.07
+    }
+  },
+  "lookups" : { },
+  "aggregations" : { },
+  "mixedWorkload" : { },
+  "footprint" : { },
+  "caveats" : [ "Run failed: ArangoDBException: Response Code: 503[upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused]" ]
+}

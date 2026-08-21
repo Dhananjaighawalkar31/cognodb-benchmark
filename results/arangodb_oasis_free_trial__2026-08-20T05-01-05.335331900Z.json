@@ -1,0 +1,24 @@
+{
+  "platform" : "ArangoDB Oasis (free trial)",
+  "startedAtUtc" : "2026-08-20T04:58:07.795899600Z",
+  "environment" : {
+    "iterations_per_read_workload" : 20,
+    "mixed_workload_concurrency" : 20,
+    "mixed_workload_duration_seconds" : 5,
+    "load_batch_size" : 1000,
+    "dataset_file" : "data\\ca-HepPh.txt.gz",
+    "node_count" : 12008,
+    "relationship_count" : 237010
+  },
+  "loading" : {
+    "total_wall_clock_ms" : 170748,
+    "nodes_per_second" : 70.33,
+    "relationships_per_second" : 1388.07
+  },
+  "traversals" : { },
+  "lookups" : { },
+  "aggregations" : { },
+  "mixedWorkload" : { },
+  "footprint" : { },
+  "caveats" : [ "Run failed: ArangoDBException: Response: 400, Error: 1521 - AQL: collection not known to traversal: 'authors'. please add 'WITH authors' as the first line in your AQL [node #2: TraversalNode] [node #3: CalculationNode] [node #4: CollectNode] [node #5: ReturnNode] (while executing)" ]
+}
