@@ -1,4 +1,4 @@
-# CognoDB Cloud vs. Managed Graph Databases: A Fair-Resource Benchmark.
+# CognoDB Cloud vs. Managed Graph Databases: A Fair-Resource Benchmark
 
 A reproducible benchmark comparing [CognoDB Cloud](https://console.cognodb.com) against four
 other managed/self-hosted graph database platforms, on identical data, identical queries, and
